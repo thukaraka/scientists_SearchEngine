@@ -68,3 +68,163 @@ POST /_bulk
 { "index" : { "_index" : "scientists_db", "_type" : "scientists", "_id" :2 } }
 {"கண்டுபிடிப்பாளர்":"ஜான் டால்ட்டன்","பிறப்பு":"1766","இறப்பு":"1844","வாழிடம்":"","தேசியம்":"ஆங்கிலேயர்","துறை":"இயற்பியல்,வேதியல்,வானியல்","பணியிடங்கள்":"","கல்வி கற்ற இடங்கள்":"","அறியப்படுவது":"றோயல் விருது","கண்டுபிடிப்பு":"அணுக் கொள்கை"}
 ```
+
+#### checking the custom analyzer(stopwords, stemming, synonyms)
+```
+GET /scientists_db/_analyze
+{
+  "text": ["மிகவும் சிறந்த  10  வானியல் கண்டுபிடிப்பாளர்கள்"],
+  "analyzer": "my_analyzer"
+}
+```
+
+#### search for the inventor of "ஹாலோகிராபி"
+```
+GET /scientists_db/_search
+{
+ "query": {
+   "query_string": {
+            "query":"ஹாலோகிராபி"
+        }
+   }
+ }
+ ```
+ 
+ #### search for Italian scientists
+ ```
+ GET /scientists_db/_search
+{
+ "query": {
+   "match": {
+           "தேசியம்":"இத்தாலியர்"
+        }
+   }
+}
+```
+
+#### search for scientists start with ஜேம்ஸ்
+```
+GET /scientists_db/_search
+{
+  "query" : {
+         "match" : {
+                               "கண்டுபிடிப்பாளர்":"ஜேம்ஸ்*"
+        }
+    }
+}
+```
+
+#### search for scientists studied and worked in cambridge university
+```
+GET /scientists_db/_search
+{
+      "query" : {
+         "multi_match" : {
+             "query" : "கேம்பிரிச் பல்கலைக்கழகம்",
+             "fields": ["பணியிடங்கள்","கல்வி கற்ற இடங்கள்"]
+         }
+     }
+}
+```
+
+#### search for ஆல்பர்ட் ஐன்ஸ்டைன் spelling mistake - Using custom indexing for search
+```
+GET /scientists_db/scientists/_search
+{
+   "query": {
+       "multi_match" : {
+           "query" : "அல்பர்ட்  ஐன்டன்",
+           "fuzziness": "AUTO",
+       "analyzer": "my_analyzer"
+       }
+   }
+}
+```
+
+#### search for ஆல்பர்ட் ஐன்ஸ்டைன் spelling mistake - Using standard indexing for search
+```
+GET /scientists_db/scientists/_search
+{
+   "query": {
+       "multi_match" : {
+           "query" : "அல்பர்ட்  ஐன்டன்",
+           "fuzziness": "AUTO",
+       "analyzer": "standard"
+       }
+   }
+}
+```
+
+#### search for Italian mathematicians
+```
+GET /scientists_db/_search
+{
+"query": {
+  "bool": {
+        "must": [
+            { "match": { "தேசியம்": "இத்தாலியர்" }},
+            { "match": { "துறை": "கணிதம்" }}
+        ]
+      }
+    }
+ }
+ ```
+#### search for  physists who received nobel prize
+```
+GET /scientists_db/_search
+{
+"query": {
+  "bool": {
+        "must": [
+            { "match": { "அறியப்படுவது":  "நோபல் பரிசு" }},
+            { "match": { "துறை": "இயற்பியல்" }}
+        ]
+      }
+    }
+}
+```
+#### search for astronauts died after 2000
+```
+GET /scientists_db/_search
+{
+"query": {
+    "bool": {
+      "must": [{
+          "match": {
+              "துறை": "வானியல்"
+          }
+        },
+        {
+          "range": {
+            "இறப்பு" : {
+                "gte" : "2000"
+            }
+          }
+        }
+      ]
+    }
+  }
+```
+#### search for 3 scientists who belongs to the field of வானியல் or கணிதம் studied in oxford university but not worked in oxford
+```
+GET /scientists_db/_search
+{
+ "size":3,
+ "query": {
+   "bool": {
+     "must": {
+       "bool" : { 
+         "should": [
+           { "match": {  "துறை": "வானியல்" }},
+           { "match": {  "துறை": "கணிதம்"  }} 
+         ],
+         "must": { "match": {  "கல்வி கற்ற இடங்கள்": "ஆக்சுபோர்டு பல்கலைக்கழகம்" }} 
+       }
+     },
+     "must_not": { "match": {"பணியிடங்கள்": "ஆக்சுபோர்டு பல்கலைக்கழகம்" }}
+   }
+ }
+}
+
+
+```

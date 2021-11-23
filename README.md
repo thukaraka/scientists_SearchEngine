@@ -17,3 +17,54 @@ This repo contains 100 scientists data scraped from  https://ta.wikipedia.org/wi
 
 Preprocessed JSON data is stored as  the ```Scientists.json``` folder.And the Bulk API format of those 100 scientists are stored as ```bulk_format.txt``` file
 
+The following Query DSL are supported for all the diiferent types of user queries.
+
+##  Query DSL for ElasticSearch search engine
+
+```
+ # deleting an index(database)
+DELETE /scientists_db
+```
+
+This must be run before creating the index(database) because it will not allow you to create index if it already exists.Add the ```analysis``` folder in elasticserach config folder.
+
+#### custom stop words ,stemming and synonyms new analyzer along with the standard analyzer
+
+```
+PUT /scientists_db/
+{
+        "settings": {
+            "analysis": {
+                "analyzer": {
+                    "my_analyzer": {
+                        "tokenizer": "standard",
+                        "filter": ["custom_stopper","custom_stems","custom_synonym"]
+                    }
+                },
+                "filter": {
+                    "custom_stopper": {
+                        "type": "stop",
+                        "stopwords_path": "analysis/tamil_stopwords.txt"
+                    },
+                    "custom_stems": {
+                        "type": "stemmer_override",
+                        "rules_path": "analysis/tamil_stemming.txt"
+                    },
+                    "custom_synonym": {
+                        "type": "synonym",
+                        "synonyms_path": "analysis/synonym.txt"                
+                    }
+                }
+            }
+        }
+    }
+```
+#### Uploading data using bulk API
+
+```
+POST /_bulk
+{ "index" : { "_index" : "scientists_db", "_type" : "scientists", "_id" :1 } }
+{"கண்டுபிடிப்பாளர்":"பிலைசு பாஸ்கல்","பிறப்பு":"1623","இறப்பு":"1662","வாழிடம்":"பிரான்சு","தேசியம்":"பிரான்சியர்","துறை":"மெய்யியல், கணிதம்","பணியிடங்கள்":"","கல்வி கற்ற இடங்கள்":"பிரான்ஸ் நாட்டு அறிவியல் கலைக்கழகம்","கண்டுபிடிப்பு":"கூட்டும் இயந்திரம்"}
+{ "index" : { "_index" : "scientists_db", "_type" : "scientists", "_id" :2 } }
+{"கண்டுபிடிப்பாளர்":"ஜான் டால்ட்டன்","பிறப்பு":"1766","இறப்பு":"1844","வாழிடம்":"","தேசியம்":"ஆங்கிலேயர்","துறை":"இயற்பியல்,வேதியல்,வானியல்","பணியிடங்கள்":"","கல்வி கற்ற இடங்கள்":"","அறியப்படுவது":"றோயல் விருது","கண்டுபிடிப்பு":"அணுக் கொள்கை"}
+```

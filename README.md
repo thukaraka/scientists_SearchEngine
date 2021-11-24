@@ -69,11 +69,20 @@ POST /_bulk
 {"கண்டுபிடிப்பாளர்":"ஜான் டால்ட்டன்","பிறப்பு":"1766","இறப்பு":"1844","வாழிடம்":"","தேசியம்":"ஆங்கிலேயர்","துறை":"இயற்பியல்,வேதியல்,வானியல்","பணியிடங்கள்":"","கல்வி கற்ற இடங்கள்":"","அறியப்படுவது":"றோயல் விருது","கண்டுபிடிப்பு":"அணுக் கொள்கை"}
 ```
 
-#### checking the custom analyzer(stopwords, stemming, synonyms)
+#### checking the custom analyzer(stopwords, stemming)
 ```
 GET /scientists_db/_analyze
 {
-  "text": ["மிகவும் சிறந்த  10  வானியல் கண்டுபிடிப்பாளர்கள்"],
+ "text": ["மிகவும் சிறந்த  10  வானியல் துறைசார்ந்த கண்டுபிடிப்பாளர்கள்"],
+ "analyzer": "my_analyzer"
+}
+```
+
+#### checking the similar words
+```
+GET /scientists_db/_analyze
+{
+  "text": ["பற்றறி"],
   "analyzer": "my_analyzer"
 }
 ```
@@ -102,17 +111,53 @@ GET /scientists_db/_search
 }
 ```
 
+#### search for scientists start with  "ஜா" 
+```
+GET /scientists_db/_search
+{
+    "query": {
+        "wildcard" : {
+	        "கண்டுபிடிப்பாளர்" : "ஜா*"     
+	        }
+    }
+}
+```
+
+#### search for scientists end with  "டன்" in their names
+```
+{
+    "query": {
+        "wildcard" : {
+	        "கண்டுபிடிப்பாளர்" : "*டன்"     
+	        }
+    }
+}
+```
+
+#### search for scientists  with  "டன்"  in their names
+```
+GET /scientists_db/_search
+{
+    "query": {
+        "wildcard" : {
+	        "கண்டுபிடிப்பாளர்" : "*கார்*"     
+	        }
+    }
+}
+```
+
 #### search for scientists start with ஜேம்ஸ்
 ```
 GET /scientists_db/_search
 {
   "query" : {
          "match" : {
-                               "கண்டுபிடிப்பாளர்":"ஜேம்ஸ்*"
+              "கண்டுபிடிப்பாளர்":"ஜேம்ஸ்*"
         }
     }
 }
 ```
+
 
 #### search for scientists studied and worked in cambridge university
 ```
@@ -205,6 +250,7 @@ GET /scientists_db/_search
     }
   }
 ```
+
 #### search for 3 scientists who belongs to the field of வானியல் or கணிதம் studied in oxford university but not worked in oxford
 ```
 GET /scientists_db/_search
@@ -225,6 +271,67 @@ GET /scientists_db/_search
    }
  }
 }
-
-
 ```
+
+#### Scientists who received "நோபல்" prize 
+```
+GET /scientists_db/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "நோபில்",
+      "fields":["அறியப்படுவது"], 
+      "fuzziness": "AUTO",
+      "analyzer": "my_analyzer"
+    }
+  }
+}
+```
+
+#### bucketing using nationality
+```
+GET /scientists_db/_search 
+{
+  "aggs": {
+    "group_by_nationality": {
+      "terms": { "field": "தேசியம்.keyword" }
+    }
+  }
+}
+```
+
+#### bucketing using nationality and prize
+```
+GET /scientists_db/_search 
+{
+  "aggs": {
+    "group_by_nationality": {
+      "terms": {
+        "field":  "தேசியம்.keyword"
+      }
+    },
+    "group_by_prize": {
+      "terms": {
+        "field":  "அறியப்படுவது.keyword"
+      }
+    }
+     
+  }
+}
+```
+
+#### searching for more like scientists names
+```
+GET scientists_db/_search
+{
+  "query": {
+    "more_like_this" : {
+      "fields" : ["கண்டுபிடிப்பாளர்"],
+      "like" : "ஜான் நேப்பியர்",
+      "min_term_freq" : 1,
+      "max_query_terms" : 3
+    }
+  }
+}
+```
+

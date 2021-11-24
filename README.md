@@ -335,3 +335,32 @@ GET scientists_db/_search
 }
 ```
 
+#### astronaut who is not American but reveived a nobel prize or royal prize but died after 1900
+```
+GET /scientists_db/_search
+{
+ "query": {
+   "bool": {
+     "must": {
+       "bool" : { 
+         "should": [
+           { "match":{"அறியப்படுவது":"நோபல் பரிசு"}},
+           { "match":{"அறியப்படுவது":"றோயல் விருது" } }
+         ],
+         "filter": [ 
+       {
+         "range": {
+           "இறப்பு" : {
+               "gte" : "1900"
+           }
+         }
+       }
+     ],
+         "must": { "match": { "துறை": "வானியல்" }} 
+       }
+     },
+     "must_not": { "match": {"தேசியம்": "அமெரிக்கர்"}}
+   }
+ }
+}
+```

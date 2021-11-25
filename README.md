@@ -251,7 +251,7 @@ GET /scientists_db/_search
   }
 ```
 
-#### search for 3 scientists who belongs to the field of வானியல் or கணிதம் studied in oxford university but not worked in oxford
+#### search for 3 scientists who belongs to the field of வானியல் but not இயற்பியல் studied in oxford university or cambridge university
 ```
 GET /scientists_db/_search
 {
@@ -261,13 +261,13 @@ GET /scientists_db/_search
      "must": {
        "bool" : { 
          "should": [
-           { "match": {  "துறை": "வானியல்" }},
-           { "match": {  "துறை": "கணிதம்"  }} 
+           { "match": {  "கல்வி கற்ற இடங்கள்": "கேம்பிரிச் பல்கலைக்கழகம்"  }},
+           { "match": {  "கல்வி கற்ற இடங்கள்": "ஆக்சுபோர்டு பல்கலைக்கழகம்"  }} 
          ],
-         "must": { "match": {  "கல்வி கற்ற இடங்கள்": "ஆக்சுபோர்டு பல்கலைக்கழகம்" }} 
+         "must": { "match": { "துறை": "வானியல்" }} 
        }
      },
-     "must_not": { "match": {"பணியிடங்கள்": "ஆக்சுபோர்டு பல்கலைக்கழகம்" }}
+     "must_not": { "match": {"துறை": "இயற்பியல்"  }}
    }
  }
 }

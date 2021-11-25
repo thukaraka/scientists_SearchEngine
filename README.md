@@ -249,6 +249,7 @@ GET /scientists_db/_search
       ]
     }
   }
+  }
 ```
 
 #### search for 3 scientists who belongs to the field of வானியல் but not இயற்பியல் studied in oxford university or cambridge university

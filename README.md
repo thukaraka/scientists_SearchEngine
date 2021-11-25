@@ -336,7 +336,7 @@ GET scientists_db/_search
 }
 ```
 
-#### astronaut who is not American but reveived a nobel prize or royal prize but died after 1900
+#### astronaut who is not American but reveived a nobel prize or Bruce Medal but died after 1900
 ```
 GET /scientists_db/_search
 {
@@ -346,7 +346,7 @@ GET /scientists_db/_search
        "bool" : { 
          "should": [
            { "match":{"அறியப்படுவது":"நோபல் பரிசு"}},
-           { "match":{"அறியப்படுவது":"றோயல் விருது" } }
+           { "match":{"அறியப்படுவது":"புரூசு பதக்கம்"} }
          ],
          "filter": [ 
        {
@@ -364,4 +364,5 @@ GET /scientists_db/_search
    }
  }
 }
+
 ```
